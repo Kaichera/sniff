@@ -1,4 +1,4 @@
-# Sniff - Deploy AI Agents to Linear in Seconds
+# 🐶 Sniff - Deploy AI Agents to Linear in Seconds
 
 > CLI-first, configuration as code, developer-friendly
 
