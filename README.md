@@ -1,4 +1,4 @@
-# 🐶 Sniff - Deploy AI Agents to Linear in Seconds
+# Sniff - Deploy AI Agents to Linear in Seconds
 
 > CLI-first, configuration as code, developer-friendly
 
@@ -12,8 +12,6 @@ npm install -g @sniff-dev/cli
 
 # Log in and connect integrations
 sniff login
-sniff connect linear
-sniff connect anthropic
 
 # Create agent config
 sniff init
@@ -88,17 +86,15 @@ sniff logout            # Log out
 
 # Connections
 sniff connect linear    # Connect Linear workspace via OAuth
-sniff connect github    # (Future) Connect GitHub
+sniff connect anthropic  # Connect Anthropic API key
+sniff connect github    # Connect GitHub
 
 # Agent Management
 sniff init [name]       # Create config.yml template
 sniff deploy            # Deploy/update agent
 sniff deploy --dry-run  # Validate config without deploying
 sniff list              # List all deployed agents
-
-# Development
-sniff logs [agent] -f   # (Future) Stream agent logs
-sniff remove [agent]    # (Future) Remove deployed agent
+sniff remove [agent]    # Remove deployed agent
 ```
 
 ## Examples
