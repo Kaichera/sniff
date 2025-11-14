@@ -14,6 +14,8 @@
   "scripts": {
     "prepare": "husky",
     "dev": "pnpm --filter @sniff-dev/cli dev",
+    "dev:cli": "pnpm --filter @sniff-dev/cli dev",
+    "dev:docs": "pnpm --filter sniff-docs dev",
     "build": "pnpm --recursive build",
     "lint": "eslint .",
     "format": "prettier --write .",

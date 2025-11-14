@@ -1,6 +1,16 @@
 {
   "name": "@sniff-dev/shared",
   "version": "1.11.0",
+  "license": "MIT",
+  "author": "Sniff <hello@sniff.to>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sniff-dev/sniff.git",
+    "directory": "packages/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/sniff-dev/sniff/issues"
+  },
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
