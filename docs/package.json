@@ -10,7 +10,7 @@
     "a11y": "mint a11y"
   },
   "devDependencies": {
-    "mint": "^2.0.0"
+    "mint": "^4.2.201"
   },
   "engines": {
     "node": ">=19"
