@@ -20,6 +20,16 @@
   "navbar": {
     "links": [
       {
+        "label": "",
+        "href": "https://discord.gg/huk9sSQCJA",
+        "icon": "discord"
+      },
+      {
+        "label": "",
+        "href": "https://github.com/sniff-dev/sniff",
+        "icon": "github"
+      },
+      {
         "label": "Sign In",
         "href": "https://sniff.to/sign-in"
       }

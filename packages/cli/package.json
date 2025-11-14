@@ -21,6 +21,14 @@
   "homepage": "https://sniff.to",
   "license": "MIT",
   "author": "Sniff <hello@sniff.to>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sniff-dev/sniff.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/sniff-dev/sniff/issues"
+  },
   "type": "module",
   "publishConfig": {
     "access": "public"
