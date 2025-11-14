@@ -1,0 +1,184 @@
+---
+title: Quickstart
+description: Deploy your first AI agent to Linear in 5 commands
+---
+
+# Quickstart Guide
+
+Get your first AI agent running in Linear in under 2 minutes. This guide walks you through the three key steps: authentication, creating a config, and deploying.
+
+## Prerequisites
+
+- Node.js 20 or higher
+- A Linear workspace where you have admin access
+- An npm account (for installing the CLI)
+
+## Installation
+
+First, install the Sniff CLI globally:
+
+```bash
+npm install -g @sniff-dev/cli
+```
+
+Verify the installation:
+
+```bash
+sniff --version
+```
+
+## Step 1: Authentication
+
+Log in to Sniff to authenticate your CLI:
+
+```bash
+sniff login
+```
+
+This will open your browser to:
+
+1. Complete authentication with Clerk
+2. Connect your Linear workspace via OAuth
+3. Connect your Anthropic API key (for powering your agents)
+
+Once successful, you'll see:
+
+```
+✓ Logged in as your-email@example.com
+
+Ready to deploy agents!
+Run `sniff init` to create your first agent.
+```
+
+Your credentials are securely stored in `~/.sniff/credentials`.
+
+<Note>You need admin permissions in your Linear workspace to complete this step.</Note>
+
+## Step 2: Create Agent Configuration
+
+Initialize a new agent configuration file:
+
+```bash
+sniff init
+```
+
+This creates a `config.yml` file in your current directory:
+
+```yaml
+version: '1.0'
+
+agent:
+  id: 'triage-bot'
+  name: 'Triage Agent'
+  description: 'Automatically triages and classifies incoming issues'
+
+  system_prompt: |
+    You are a triage specialist for an engineering team.
+
+    When a new issue is created:
+    1. Classify the issue type: bug, feature, question, or task
+    2. Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
+    3. Provide clear reasoning for your classification
+
+    Be concise but thorough in your analysis.
+
+  model:
+    anthropic:
+      name: 'claude-3-5-sonnet-20241022'
+      temperature: 0.7
+      max_tokens: 2000
+```
+
+<Tip>
+  Edit the `system_prompt` to customize your agent's behavior. This is where you define what your
+  agent does!
+</Tip>
+
+## Step 3: Deploy Your Agent
+
+Deploy your agent to Linear:
+
+```bash
+sniff deploy
+```
+
+The CLI will:
+
+1. Validate your configuration file
+2. Upload your agent to Sniff's runtime
+3. Register the agent with your Linear workspace
+
+Expected output:
+
+```
+✔ Agent "Triage Agent" deployed
+
+✓ Deployment successful!
+  ID: b27dcd96-a610-4ebd-ae73-5d7b60a5b3e1
+  Connection: 7f41c799-17c2-4fc1-a56c-830f63c3eb17
+  Status: Active
+
+Your agent is now listening for Linear events.
+Create an issue in Linear to test it!
+```
+
+## Verify Deployment
+
+Check that your agent is running:
+
+```bash
+sniff list
+```
+
+You should see your agent listed:
+
+```bash
+Your Agents:
+
+  Triage Agent ● active
+    ID: 6b6d78ff-3060-4034-b49a-9686c5560b1f
+    Created: 11/7/2025
+
+  Docs Agent ● active
+    ID: 67e141f8-31a3-479d-8e57-b828327884f3
+    Created: 11/7/2025
+
+  Release Agent ● active
+    ID: b27dcd96-a610-4ebd-ae73-5d7b60a5b3e1
+    Created: 11/6/2025
+```
+
+## Next Steps
+
+Now that your agent is deployed:
+
+1. **Test it out**: Create an issue in Linear and @mention your agent
+2. **See how it works**: Read [How It Works](/how-it-works) to understand the agent lifecycle
+3. **Customize**: Check out the [Configuration](/configuration) guide to add more capabilities
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="'sniff' command not found">
+    Make sure you installed the CLI globally with the `-g` flag. If it still doesn't work, try:
+
+    ```bash
+    npx @sniff-dev/cli login
+    ```
+
+  </Accordion>
+
+  <Accordion title="Authentication fails">
+    Clear your credentials and try again:
+
+    ```bash
+    rm -rf ~/.sniff/credentials
+    sniff login
+    ```
+
+  </Accordion>
+
+  <Accordion title="Linear connection fails">
+    Ensure you have admin permissions in your Linear workspace. Only workspace admins can install agents.
+  </Accordion>
+</AccordionGroup>

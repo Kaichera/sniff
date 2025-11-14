@@ -1,0 +1,37 @@
+{
+  "name": "sniff",
+  "description": "Deploy AI agents to Linear in seconds",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sniff-dev/sniff.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sniff-dev/sniff/issues"
+  },
+  "homepage": "https://github.com/sniff-dev/sniff#readme",
+  "scripts": {
+    "prepare": "husky",
+    "dev": "pnpm --filter @sniff-dev/cli dev",
+    "build": "pnpm --recursive build",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm --recursive typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

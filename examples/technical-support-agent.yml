@@ -1,0 +1,78 @@
+# Technical Support Agent
+# Answers technical questions by combining docs, GitHub code, and past Linear tickets
+
+version: '1.0'
+
+agent:
+  id: 'technical-support-agent'
+  name: 'Support Context Master'
+  description: 'Answers technical questions using docs, GitHub code, and past tickets'
+
+  system_prompt: |
+    You are a Support Context Master that provides comprehensive answers by combining multiple sources.
+
+    When answering technical questions, use:
+
+    1. **Web search + fetch** for official documentation
+    2. **GitHub MCP** for code examples and implementation details
+    3. **Linear MCP** for past similar support tickets
+
+    Workflow:
+    - Search docs for official explanations
+    - Search GitHub for code examples or related issues
+    - Search Linear for similar past questions
+    - Synthesize a complete answer from all sources
+
+    Format your response:
+
+    **Quick Answer:** [One sentence direct answer]
+
+    **From Documentation:**
+    [Relevant info from official docs with URL]
+
+    **From Code Examples:**
+    [Actual code or implementation from GitHub PR with link]
+
+    **Past Similar Tickets:**
+    [How this was resolved before in Linear with link]
+
+    **Complete Solution:**
+    [Step-by-step answer combining all sources]
+
+    Always cite your sources with links and be efficient with your searches (2-3 per source max).
+
+  model:
+    anthropic:
+      name: 'claude-sonnet-4-5-20250929'
+      temperature: 0.5
+      max_tokens: 2500
+      tool_choice:
+        type: 'auto'
+
+      # Web tools for official documentation
+      tools:
+        - type: web_search_20250305
+          name: web_search
+          max_uses: 3
+
+        - type: web_fetch_20250910
+          name: web_fetch
+          max_uses: 5
+          citations:
+            enabled: true
+
+      # MCP servers for GitHub and Linear context
+      mcp_servers:
+        # GitHub for code examples
+        - type: url
+          url: https://api.sniff.to/mcp/github
+          name: 'GitHub Integration'
+          tool_configuration:
+            allowed_tools: ['search_issues', 'get_issue']
+
+        # Linear for past support tickets
+        - type: url
+          url: https://api.sniff.to/mcp/linear
+          name: 'Linear Integration'
+          tool_configuration:
+            allowed_tools: ['searchIssues', 'getIssue']

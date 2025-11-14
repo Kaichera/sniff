@@ -1,0 +1,45 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Sniff",
+  "description": "Deploy production-ready AI agents to Linear in under 2 minutes",
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png",
+    "href": "https://sniff.to"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#3b82f6",
+    "light": "#60a5fa",
+    "dark": "#E4E4E7"
+  },
+  "appearance": {
+    "default": "dark"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Sign In",
+        "href": "https://sniff.to/sign-in"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get Started",
+      "href": "https://sniff.to/sign-up"
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": ["introduction", "quickstart", "how-it-works", "configuration"]
+      },
+      {
+        "group": "Reference",
+        "pages": ["schema-reference"]
+      }
+    ]
+  }
+}

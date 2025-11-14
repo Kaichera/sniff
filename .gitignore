@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+
+# Config
+config.yml
+
+# Local development
+dev/
+CLAUDE.md

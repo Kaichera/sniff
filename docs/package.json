@@ -1,0 +1,18 @@
+{
+  "name": "sniff-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sniff documentation",
+  "scripts": {
+    "dev": "mint dev",
+    "dev:port": "mint dev --port 3002",
+    "lint": "mint broken-links",
+    "a11y": "mint a11y"
+  },
+  "devDependencies": {
+    "mint": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=19"
+  }
+}

@@ -1,0 +1,15 @@
+/* Custom styling for Sniff documentation */
+
+/* Primary CTA button (Get Started) */
+#topbar-cta-button span {
+  color: #000 !important;
+}
+
+#topbar-cta-button svg {
+  color: #000 !important;
+}
+
+/* Hide theme toggle button */
+button[aria-label='Toggle dark mode'] {
+  display: none !important;
+}
