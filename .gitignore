@@ -19,8 +19,8 @@ dist/
 # OS
 .DS_Store
 
-# Config
-config.yml
+# Sniff Config
+sniff.yml
 
 # Local development
 dev/

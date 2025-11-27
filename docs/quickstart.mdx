@@ -1,184 +1,144 @@
 ---
 title: Quickstart
-description: Deploy your first AI agent to Linear in 5 commands
+description: Deploy your first AI agent in 5 minutes
 ---
 
-# Quickstart Guide
+# Quickstart
 
-Get your first AI agent running in Linear in under 2 minutes. This guide walks you through the three key steps: authentication, creating a config, and deploying.
+Get your first AI agent running with Docker in under 5 minutes.
 
 ## Prerequisites
 
-- Node.js 20 or higher
-- A Linear workspace where you have admin access
-- An npm account (for installing the CLI)
+- Docker and Docker Compose
+- A Linear workspace (admin access for webhooks)
+- An Anthropic API key
 
-## Installation
-
-First, install the Sniff CLI globally:
+## Step 1: Clone and Configure
 
 ```bash
-npm install -g @sniff-dev/cli
+# Clone the repository
+git clone https://github.com/sniff-dev/sniff.git
+cd sniff
+
+# Create environment file
+cp .env.example .env
 ```
 
-Verify the installation:
+Edit `.env` with your credentials:
 
 ```bash
-sniff --version
+# .env
+LINEAR_ACCESS_TOKEN=lin_api_xxxxx
+ANTHROPIC_API_KEY=sk-ant-xxxxx
 ```
 
-## Step 1: Authentication
-
-Log in to Sniff to authenticate your CLI:
-
-```bash
-sniff login
-```
-
-This will open your browser to:
-
-1. Complete authentication with Clerk
-2. Connect your Linear workspace via OAuth
-3. Connect your Anthropic API key (for powering your agents)
-
-Once successful, you'll see:
-
-```
-✓ Logged in as your-email@example.com
-
-Ready to deploy agents!
-Run `sniff init` to create your first agent.
-```
-
-Your credentials are securely stored in `~/.sniff/credentials`.
-
-<Note>You need admin permissions in your Linear workspace to complete this step.</Note>
+<Note>
+  Get your Linear API token from [Linear Settings → API](https://linear.app/settings/api). Get your
+  Anthropic API key from [Anthropic Console](https://console.anthropic.com).
+</Note>
 
 ## Step 2: Create Agent Configuration
 
-Initialize a new agent configuration file:
-
-```bash
-sniff init
-```
-
-This creates a `config.yml` file in your current directory:
+Create a `sniff.yml` file (or use the default):
 
 ```yaml
 version: '1.0'
 
-agent:
-  id: 'triage-bot'
-  name: 'Triage Agent'
-  description: 'Automatically triages and classifies incoming issues'
+agents:
+  - id: 'triage-bot'
+    name: 'Triage Assistant'
+    description: 'Classifies and prioritizes incoming issues'
 
-  system_prompt: |
-    You are a triage specialist for an engineering team.
+    system_prompt: |
+      You are a triage specialist for an engineering team.
 
-    When a new issue is created:
-    1. Classify the issue type: bug, feature, question, or task
-    2. Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
-    3. Provide clear reasoning for your classification
+      When a new issue is created:
+      1. Classify as: bug, feature, question, or task
+      2. Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
+      3. Suggest relevant labels
+      4. Provide brief reasoning
 
-    Be concise but thorough in your analysis.
+      Be concise and decisive.
 
-  model:
-    anthropic:
-      name: 'claude-3-5-sonnet-20241022'
-      temperature: 0.7
-      max_tokens: 2000
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.3
+        max_tokens: 1500
 ```
+
+## Step 3: Start the Server
+
+```bash
+docker compose up
+```
+
+You should see:
+
+```
+sniff  | Loading configuration...
+sniff  | Configuration loaded
+sniff  | Initializing Linear platform...
+sniff  | Linear platform initialized
+sniff  | Server is running!
+sniff  |
+sniff  | Agents:
+sniff  |   - Triage Assistant (triage-bot)
+sniff  |
+sniff  | Webhooks:
+sniff  |   - POST http://localhost:3000/webhook/linear
+```
+
+## Step 4: Configure Linear Webhook
+
+1. Go to **Linear Settings** → **API** → **Webhooks**
+2. Click **New Webhook**
+3. Set the URL to your server: `http://your-server:3000/webhook/linear`
+4. Select events: **Issue** (create, update)
+5. Click **Create**
 
 <Tip>
-  Edit the `system_prompt` to customize your agent's behavior. This is where you define what your
-  agent does!
+  For local development, use [ngrok](https://ngrok.com) to expose your local server: ```bash ngrok
+  http 3000 ``` Then use the ngrok URL for your webhook.
 </Tip>
 
-## Step 3: Deploy Your Agent
+## Step 5: Test It Out
 
-Deploy your agent to Linear:
+Create an issue in Linear. Your agent will automatically respond with its analysis.
 
-```bash
-sniff deploy
-```
-
-The CLI will:
-
-1. Validate your configuration file
-2. Upload your agent to Sniff's runtime
-3. Register the agent with your Linear workspace
-
-Expected output:
-
-```
-✔ Agent "Triage Agent" deployed
-
-✓ Deployment successful!
-  ID: b27dcd96-a610-4ebd-ae73-5d7b60a5b3e1
-  Connection: 7f41c799-17c2-4fc1-a56c-830f63c3eb17
-  Status: Active
-
-Your agent is now listening for Linear events.
-Create an issue in Linear to test it!
-```
-
-## Verify Deployment
-
-Check that your agent is running:
-
-```bash
-sniff list
-```
-
-You should see your agent listed:
-
-```bash
-Your Agents:
-
-  Triage Agent ● active
-    ID: 6b6d78ff-3060-4034-b49a-9686c5560b1f
-    Created: 11/7/2025
-
-  Docs Agent ● active
-    ID: 67e141f8-31a3-479d-8e57-b828327884f3
-    Created: 11/7/2025
-
-  Release Agent ● active
-    ID: b27dcd96-a610-4ebd-ae73-5d7b60a5b3e1
-    Created: 11/6/2025
-```
+![Sniff in Linear](/images/linear1.png)
 
 ## Next Steps
 
-Now that your agent is deployed:
+<CardGroup cols={2}>
+  <Card title="How It Works" icon="gear" href="/how-it-works">
+    Learn about the agent lifecycle
+  </Card>
+  <Card title="Configuration" icon="code" href="/configuration">
+    Customize your agent's behavior
+  </Card>
+</CardGroup>
 
-1. **Test it out**: Create an issue in Linear and @mention your agent
-2. **See how it works**: Read [How It Works](/how-it-works) to understand the agent lifecycle
-3. **Customize**: Check out the [Configuration](/configuration) guide to add more capabilities
-
-## Common Issues
+## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="'sniff' command not found">
-    Make sure you installed the CLI globally with the `-g` flag. If it still doesn't work, try:
-
+  <Accordion title="Server won't start">
+    Check that your environment variables are set:
     ```bash
-    npx @sniff-dev/cli login
+    echo $LINEAR_ACCESS_TOKEN
+    echo $ANTHROPIC_API_KEY
     ```
-
+    Both should print values (not empty).
   </Accordion>
 
-  <Accordion title="Authentication fails">
-    Clear your credentials and try again:
+<Accordion title="Webhook not receiving events">
+  - Verify the webhook URL is accessible from the internet - Check Linear webhook settings show
+  "Active" status - Look at server logs for incoming requests
+</Accordion>
 
-    ```bash
-    rm -rf ~/.sniff/credentials
-    sniff login
-    ```
-
-  </Accordion>
-
-  <Accordion title="Linear connection fails">
-    Ensure you have admin permissions in your Linear workspace. Only workspace admins can install agents.
+  <Accordion title="Agent not responding">
+    - Check server logs for errors
+    - Verify the issue event type is selected in webhook settings
+    - Ensure your Anthropic API key has credits
   </Accordion>
 </AccordionGroup>

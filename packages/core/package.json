@@ -1,0 +1,46 @@
+{
+  "name": "@sniff-dev/core",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Sniff <hello@sniff.to>",
+  "description": "Core runtime for Sniff agent framework",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sniff-dev/sniff.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/sniff-dev/sniff/issues"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "sniff-server": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./platforms": {
+      "types": "./dist/platforms/index.d.ts",
+      "import": "./dist/platforms/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@sniff-dev/config": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

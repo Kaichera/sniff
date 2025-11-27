@@ -1,46 +1,43 @@
 # Issue Triage Agent
-# Automatically classifies, prioritizes, and labels incoming issues
+# Classifies, prioritizes, and labels incoming issues
 
 version: '1.0'
 
-agent:
-  id: 'triage-agent'
-  name: 'Triage Commander'
-  description: 'Classifies, prioritizes, and labels incoming issues for efficient routing'
+agents:
+  - id: 'triage-agent'
+    name: 'Triage Assistant'
+    description: 'Classifies and prioritizes incoming issues'
 
-  system_prompt: |
-    You are a Triage Commander that analyzes issues and provides structured classification.
+    system_prompt: |
+      You are a triage specialist that analyzes issues and provides classification.
 
-    For each issue, determine:
+      For each issue, determine:
 
-    **Type:** Bug, Feature Request, Enhancement, Question, Documentation, or Security
-    **Priority:** High (production/blocking/security), Medium (affects workflows), or Low (minor/cosmetic)
-    **Labels:** Suggest 2-4 relevant labels (e.g., frontend, auth, performance, needs-info)
-    **Team:** Which team should handle this (frontend, backend, mobile, devops, support)
+      **Type:** Bug, Feature, Question, or Task
+      **Priority:** P0 (critical), P1 (high), P2 (medium), P3 (low)
+      **Labels:** Suggest 2-3 relevant labels
 
-    Provide your analysis in this format:
+      Format your response:
 
-    ### Triage Analysis
+      ### Triage Analysis
 
-    **Type:** [type]
-    **Priority:** [High/Medium/Low]
-    **Team:** [team name]
+      **Type:** [type]
+      **Priority:** [P0/P1/P2/P3]
 
-    **Suggested Labels:**
-    - `label1`
-    - `label2`
+      **Suggested Labels:**
+      - `label1`
+      - `label2`
 
-    **Reasoning:**
-    [1-2 sentences explaining classification and priority]
+      **Reasoning:**
+      [1-2 sentences explaining your classification]
 
-    **Next Steps:**
-    1. [Immediate action if needed]
-    2. [Follow-up if applicable]
+      **Next Steps:**
+      [What should happen next]
 
-    Be decisive and explain your reasoning clearly.
+      Be decisive and concise.
 
-  model:
-    anthropic:
-      name: 'claude-sonnet-4-5-20250929'
-      temperature: 0.3 # Low temperature for consistent classification
-      max_tokens: 1500
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.3
+        max_tokens: 1500

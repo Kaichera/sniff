@@ -1,51 +1,34 @@
 #!/usr/bin/env node
 // packages/cli/src/index.ts
 import { Command } from 'commander';
-import { login } from './commands/login.js';
-import { logout } from './commands/logout.js';
-import { connect } from './commands/connect.js';
 import { init } from './commands/init.js';
-import { deploy } from './commands/deploy.js';
-import { list } from './commands/list.js';
-import { remove } from './commands/remove.js';
+import { validate } from './commands/validate.js';
 import { woof } from './commands/woof.js';
-import { Config } from './lib/config.js';
 import packageJson from '../package.json' with { type: 'json' };
 
 const program = new Command();
-const config = new Config();
 
 program
   .name('sniff')
   .version(packageJson.version)
-  .description('Deploy AI agents to Linear in seconds')
-  .option('--debug', 'Enable debug logging')
-  .hook('preAction', (thisCommand) => {
-    const opts = thisCommand.opts();
-    if (opts.debug) {
-      config.set('debug', 'true');
-    }
-  })
-  .hook('postAction', () => {
-    // Clean up debug flag after command completes
-    config.delete('debug');
-  })
+  .description('Self-hosted AI agent framework for Linear, GitHub, and Slack')
   .addHelpText(
     'after',
     `
 Examples:
-  $ sniff login                   # Log in to Sniff
-  $ sniff connect linear          # Connect Linear workspace
-  $ sniff init my-agent           # Create new agent config
-  $ sniff deploy                  # Deploy agent from config.yml
-  $ sniff list                    # List all deployed agents
-  $ sniff logout                  # Log out
+  $ sniff init                   # Create sniff.yml config
+  $ sniff init my-agent          # Create config with custom agent name
+  $ sniff validate               # Validate configuration
 
-Options:
-  $ sniff --debug connect linear  # Run with debug logging
+To start the server, use sniff-server (from @sniff-dev/core) or Docker.
+
+Environment Variables:
+  LINEAR_ACCESS_TOKEN            # Linear API token
+  LINEAR_WEBHOOK_SECRET          # Linear webhook signing secret (optional)
+  ANTHROPIC_API_KEY              # Anthropic API key
 
 Docs:
-  https://docs.sniff.to
+  https://github.com/sniff-dev/sniff
 
 Issues:
   https://github.com/sniff-dev/sniff/issues
@@ -53,13 +36,8 @@ Issues:
   );
 
 // Add commands
-program.addCommand(login);
-program.addCommand(logout);
-program.addCommand(connect);
 program.addCommand(init);
-program.addCommand(deploy);
-program.addCommand(list);
-program.addCommand(remove);
+program.addCommand(validate);
 program.addCommand(woof);
 
 program.parse();
