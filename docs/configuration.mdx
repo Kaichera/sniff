@@ -1,534 +1,312 @@
 ---
 title: Configuration
-description: Complete reference for configuring your Sniff agent
+description: Complete guide to configuring your Sniff agents
 ---
 
-# Agent Configuration
+# Configuration
 
-Your agent is defined in a `config.yml` file using YAML format. This guide covers the essential configuration options you need to get started.
+Your agents are defined in a `sniff.yml` file. This guide covers all configuration options.
 
 ## Basic Structure
 
-Every Sniff configuration file has this basic structure:
-
 ```yaml
 version: '1.0'
 
-agent:
-  id: 'your-agent-id'
-  name: 'Your Agent Name'
-  description: 'What your agent does'
-
-  system_prompt: |
-    Instructions for your agent...
-
-  model:
-    anthropic:
-      name: 'claude-3-5-sonnet-20241022'
-      temperature: 0.7
-      max_tokens: 2000
-      tools:
-        - type: web_search_20250305
-          name: web_search
+agents:
+  - id: 'my-agent'
+    name: 'My Agent'
+    description: 'What this agent does'
+    system_prompt: |
+      Instructions for your agent...
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.7
+        max_tokens: 2000
 ```
 
-## Required Fields
+## Environment Variables
 
-### `version`
+Credentials come from environment variables, not the YAML file:
 
-The configuration schema version. Always use `"1.0"`.
+| Variable                | Required | Description                 |
+| ----------------------- | -------- | --------------------------- |
+| `LINEAR_ACCESS_TOKEN`   | Yes      | Linear API token            |
+| `ANTHROPIC_API_KEY`     | Yes      | Anthropic API key           |
+| `LINEAR_WEBHOOK_SECRET` | No       | Webhook signing secret      |
+| `PORT`                  | No       | Server port (default: 3000) |
+
+### Variable Interpolation
+
+Use `${VAR_NAME}` syntax for values that should come from environment:
 
 ```yaml
-version: '1.0'
+mcp_servers:
+  - type: url
+    url: 'https://api.example.com/mcp'
+    name: 'Example MCP'
+    authorization_token: '${EXAMPLE_API_KEY}'
 ```
 
-### `agent.id`
+Syntax options:
 
-A unique identifier for your agent. Must be lowercase letters, numbers, and hyphens only.
+- `${VAR_NAME}` - Required (error if not set)
+- `${VAR_NAME:-default}` - Optional with default value
+
+## Agent Fields
+
+### `id` (required)
+
+Unique identifier. Lowercase letters, numbers, and hyphens only.
 
 ```yaml
-agent:
-  id: 'triage-bot'
+id: 'triage-bot'
 ```
 
-**Rules**:
+**Rules:** 1-50 characters, pattern `^[a-z0-9-]+$`
 
-- Pattern: `^[a-z0-9-]+$`
-- Length: 1-50 characters
-- Must be unique within your workspace
+### `name` (required)
 
-### `agent.name`
-
-The display name shown in Linear. This is what users see when mentioning or assigning your agent.
+Display name shown in Linear.
 
 ```yaml
-agent:
-  name: 'Triage Assistant'
+name: 'Triage Assistant'
 ```
 
-**Rules**:
+**Rules:** 1-100 characters
 
-- Length: 1-100 characters
-- Human-readable, can include spaces and capitals
+### `description` (optional)
 
-### `agent.system_prompt`
-
-The core instructions that define your agent's behavior. This is sent to Claude as the system message.
+Brief description of the agent's purpose.
 
 ```yaml
-agent:
-  system_prompt: |
-    You are a triage specialist for a development team.
-
-    When analyzing an issue:
-    1. Classify as BUG/FEATURE/QUESTION/TASK
-    2. Set priority P0-P3
-    3. Provide clear reasoning
-
-    Respond in markdown format.
+description: 'Classifies and prioritizes incoming issues'
 ```
 
-**Best Practices**:
+**Rules:** 0-500 characters
 
-- Be specific about the agent's role and capabilities
-- Define expected output format (markdown recommended)
-- Include decision criteria and examples
-- Keep under 2000 tokens for efficiency
-- Use YAML's `|` syntax for multi-line prompts
+### `system_prompt` (required)
 
-<Tip>
-  The system prompt is where your agent's personality and behavior are defined. Spend time crafting
-  this carefully!
-</Tip>
-
-### `agent.model`
-
-Configures which Claude model to use and its parameters.
+Core instructions that define your agent's behavior.
 
 ```yaml
-agent:
-  model:
-    anthropic:
-      name: 'claude-3-5-sonnet-20241022'
-      temperature: 0.7
-      max_tokens: 2000
+system_prompt: |
+  You are a triage specialist for a development team.
+
+  When analyzing an issue:
+  1. Classify as BUG/FEATURE/QUESTION/TASK
+  2. Set priority P0-P3
+  3. Provide clear reasoning
+
+  Respond in markdown format.
 ```
 
-#### Available Models
+<Tip>Use YAML's `|` syntax for multi-line prompts. Be specific about output format.</Tip>
 
-| Model Name                   | Best For                     | Speed     | Cost   |
-| ---------------------------- | ---------------------------- | --------- | ------ |
-| `claude-sonnet-4-5-20250929` | Latest, most capable         | Fast      | Medium |
-| `claude-haiku-4-5-20251001`  | Quick responses, high volume | Very Fast | Low    |
-| `claude-opus-4-1-20250805`   | Complex reasoning, accuracy  | Slower    | High   |
-| `claude-3-5-sonnet-20241022` | Balanced performance         | Fast      | Medium |
+## Model Configuration
 
-<Note>
-  For most use cases, **Claude 3.5 Sonnet** or **Haiku 4.5** provides the best balance of speed and
-  capability.
-</Note>
-
-## Optional Fields
-
-### `agent.description`
-
-A brief description of what your agent does (shown in Linear UI).
+All model options go under `model.anthropic`:
 
 ```yaml
-agent:
-  description: 'Analyzes and classifies engineering issues'
+model:
+  anthropic:
+    name: 'claude-sonnet-4-20250514'
+    temperature: 0.7
+    max_tokens: 2000
 ```
 
-**Rules**: 0-500 characters
+### Available Models
 
-### `agent.model.temperature`
+| Model                       | Best For               | Speed     |
+| --------------------------- | ---------------------- | --------- |
+| `claude-sonnet-4-20250514`  | Balanced (recommended) | Fast      |
+| `claude-haiku-4-5-20251001` | Quick responses        | Very Fast |
+| `claude-opus-4-20250514`    | Complex reasoning      | Slower    |
 
-Controls randomness in responses. Lower values = more deterministic, higher = more creative.
+### `temperature`
+
+Controls randomness. Lower = more deterministic.
+
+- `0.0-0.3` - Consistent (triage, classification)
+- `0.4-0.7` - Balanced (default)
+- `0.8-1.0` - Creative
+
+### `max_tokens`
+
+Maximum response length.
+
+- Short: 500-1000
+- Medium: 1000-2000
+- Long: 3000-4000
+- Maximum: 8192
+
+### `thinking` (optional)
+
+Enable extended thinking for complex analysis:
 
 ```yaml
-agent:
-  model:
-    anthropic:
-      temperature: 0.7
+model:
+  anthropic:
+    thinking:
+      type: 'enabled'
+      budget_tokens: 2000
 ```
 
-**Guidelines**:
-
-- **0.0-0.3**: Consistent, deterministic responses (good for classification)
-- **0.4-0.7**: Balanced creativity and consistency (default)
-- **0.8-1.0**: More creative and varied responses
-
-### `agent.model.max_tokens`
-
-Maximum length of the agent's response in tokens.
-
-```yaml
-agent:
-  model:
-    anthropic:
-      max_tokens: 2000
-```
-
-**Guidelines**:
-
-- Short responses: 500-1000
-- Medium responses: 1000-2000 (default)
-- Long analysis: 3000-4000
-- Maximum: 8192 (for very detailed responses)
-
-### `agent.model.top_p`
-
-Alternative to temperature for controlling randomness (nucleus sampling).
-
-```yaml
-agent:
-  model:
-    anthropic:
-      top_p: 0.9
-```
-
-<Info>Use either `temperature` OR `top_p`, not both. Temperature is usually sufficient.</Info>
+<Note>When thinking is enabled, `temperature` must be `1`.</Note>
 
 ## Tools
 
-Tools give your agent additional capabilities beyond text analysis.
+Give your agent capabilities beyond text analysis.
 
 ### Web Search
-
-Allows your agent to search the web for information. Powered by Anthropic's infrastructure.
-
-```yaml
-agent:
-  model:
-    anthropic:
-      tools:
-        - type: web_search_20250305
-          name: web_search
-          max_uses: 10
-```
-
-**Configuration**:
 
 ```yaml
 tools:
   - type: web_search_20250305
     name: web_search
-    max_uses: 10 # Optional: limit searches per conversation
-    allowed_domains: # Optional: only search these domains
+    max_uses: 10
+    allowed_domains:
       - 'docs.example.com'
-      - 'linear.app'
-    blocked_domains: # Optional: exclude domains
+    blocked_domains:
       - 'spam.com'
 ```
 
-**Use Cases**:
-
-- Look up documentation and references
-- Find similar issues or error messages
-- Research technical specifications
-- Get current information
-
-**Pricing**: $10 per 1,000 searches (plus standard token costs)
-
 ### Web Fetch
 
-Retrieves and processes content from specific URLs.
-
 ```yaml
-agent:
-  model:
-    anthropic:
-      tools:
-        - type: web_fetch_20250910
-          name: web_fetch
-          max_uses: 5
+tools:
+  - type: web_fetch_20250910
+    name: web_fetch
+    max_uses: 10
+    citations:
+      enabled: true
 ```
 
-**Use Cases**:
+## MCP Servers
 
-- Read documentation pages
-- Analyze issue links
-- Fetch API responses
-- Process external content
-
-## MCP Integrations
-
-MCP (Model Context Protocol) servers give agents access to external platforms like Linear and GitHub.
-
-### Linear
-
-Query your Linear workspace directly from agents.
-
-```yaml
-agent:
-  model:
-    anthropic:
-      mcp_servers:
-        - type: url
-          url: https://api.sniff.to/mcp/linear
-          name: 'Linear Integration'
-          tool_configuration:
-            allowed_tools: ['list_issues', 'get_issue']
-```
-
-**Available tools**:
-
-- `list_issues` - List and search workspace issues
-- `get_issue` - Get issue details by ID
-
-**Setup**: Run `sniff connect linear` (completed during quickstart)
-
-### GitHub
-
-Access GitHub repositories and issues.
-
-```yaml
-agent:
-  model:
-    anthropic:
-      mcp_servers:
-        - type: url
-          url: https://api.sniff.to/mcp/github
-          name: 'GitHub Integration'
-          tool_configuration:
-            allowed_tools: ['search_issues', 'get_issue', 'list_repositories']
-```
-
-**Available tools**:
-
-- `list_repositories` - List accessible repositories
-- `search_issues` - Search issues/PRs with GitHub query syntax
-- `get_issue` - Get complete issue details with comments
-
-**Setup**: Run `sniff connect github` from CLI or dashboard
-
-### Tool Configuration
-
-Control which MCP tools each agent can use:
+Connect external tools via Model Context Protocol:
 
 ```yaml
 mcp_servers:
   - type: url
-    url: https://api.sniff.to/mcp/github
-    name: 'GitHub Integration'
+    url: 'https://api.example.com/mcp'
+    name: 'My Integration'
+    authorization_token: '${API_KEY}'
     tool_configuration:
-      allowed_tools: ['search_issues'] # Only allow searches
+      allowed_tools:
+        - 'get_data'
+        - 'search'
 ```
-
-Omit `tool_configuration` to allow all tools from that MCP server.
-
-## Environment Variables
-
-You can use environment variables in your configuration to keep secrets out of version control and enable different values per environment.
-
-### Syntax
-
-Use `${VAR_NAME}` to reference environment variables:
-
-```yaml
-# Required variable (error if not set)
-authorization_token: ${API_KEY}
-
-# Optional variable with default value
-url: ${MCP_URL:-https://api.example.com/mcp}
-name: ${AGENT_NAME:-Default Agent}
-```
-
-**Rules**:
-
-- Variable names must be UPPERCASE with underscores: `A-Z`, `0-9`, `_`
-- Use `${VAR_NAME}` for required variables (deployment fails if not set)
-- Use `${VAR_NAME:-default}` for optional variables with fallback values
-- Interpolation happens before validation, so values must match expected types
-
-### Third-Party MCP Servers
-
-The most common use case is providing API keys for third-party MCP servers:
-
-```yaml
-agent:
-  model:
-    anthropic:
-      mcp_servers:
-        # Sniff's Linear integration (no token needed)
-        - type: url
-          url: https://api.sniff.to/mcp/linear
-          name: 'Linear Integration'
-
-        # Third-party knowledge base (requires API key)
-        - type: url
-          url: ${KNOWLEDGE_BASE_URL:-https://api.ragie.ai/v1/mcp}
-          name: 'Knowledge Base'
-          authorization_token: ${RAGIE_API_KEY}
-```
-
-<Warning>
-  **Never commit secrets to version control.** Always use environment variables for API keys,
-  tokens, and other sensitive data.
-</Warning>
-
-### Setting Environment Variables
-
-**Local development** - create a `.env` file:
-
-```bash
-# .env
-RAGIE_API_KEY=your_secret_key_here
-KNOWLEDGE_BASE_URL=https://api.ragie.ai/v1/mcp
-```
-
-Then deploy:
-
-```bash
-# Set env vars before running
-export $(cat .env | xargs)
-sniff deploy
-```
-
-**CI/CD (GitHub Actions)**:
-
-```yaml
-- name: Deploy agent
-  env:
-    RAGIE_API_KEY: ${{ secrets.RAGIE_API_KEY }}
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-  run: npx @sniff-dev/cli deploy
-```
-
-**Production** - use your platform's secrets management (AWS Secrets Manager, Vercel env vars, etc.)
 
 ## Complete Examples
 
-### Minimal Configuration
-
-The simplest working configuration:
-
-```yaml
-version: '1.0'
-
-agent:
-  id: 'simple-bot'
-  name: 'Simple Bot'
-
-  system_prompt: |
-    You are a helpful assistant that answers questions about Linear issues.
-
-  model:
-    anthropic:
-      name: 'claude-3-5-sonnet-20241022'
-```
-
 ### Triage Agent
 
-A practical example for issue classification:
+```yaml
+version: '1.0'
+
+agents:
+  - id: 'triage-bot'
+    name: 'Triage Assistant'
+    description: 'Classifies and prioritizes issues'
+
+    system_prompt: |
+      You are a triage specialist.
+
+      For each issue:
+      1. Classify as: bug, feature, question, task
+      2. Set priority: P0-P3
+      3. Suggest labels
+      4. Explain reasoning
+
+      Be concise.
+
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.3
+        max_tokens: 1500
+```
+
+### Research Agent with Web Search
 
 ```yaml
 version: '1.0'
 
-agent:
-  id: 'triage-bot'
-  name: 'Triage Assistant'
-  description: 'Automatically classifies and prioritizes incoming issues'
+agents:
+  - id: 'research-bot'
+    name: 'Research Assistant'
+    description: 'Answers questions using web search'
 
-  system_prompt: |
-    You are a triage specialist for an engineering team.
+    system_prompt: |
+      You are a research assistant.
 
-    When a new issue is created:
-    1. Classify as: bug, feature, question, or task
-    2. Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
-    3. Suggest relevant labels
-    4. Provide clear reasoning
+      When asked a question:
+      1. Search for relevant information
+      2. Fetch detailed content from best sources
+      3. Provide answer with citations
 
-    Format your response using markdown with clear sections.
-    Be concise but thorough.
+      Always cite your sources.
 
-  model:
-    anthropic:
-      name: 'claude-haiku-4-5-20251001'
-      temperature: 0.3 # Low for consistent classification
-      max_tokens: 1500
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.5
+        max_tokens: 3000
+        tool_choice:
+          type: 'auto'
+        tools:
+          - type: web_search_20250305
+            name: web_search
+            max_uses: 5
+          - type: web_fetch_20250910
+            name: web_fetch
+            max_uses: 10
+            citations:
+              enabled: true
 ```
 
-### Research Agent
-
-An agent that searches documentation and GitHub issues:
+### Multiple Agents
 
 ```yaml
 version: '1.0'
 
-agent:
-  id: 'research-bot'
-  name: 'Research Assistant'
-  description: 'Searches documentation and GitHub for context on issues'
+agents:
+  - id: 'triage-bot'
+    name: 'Triage Bot'
+    system_prompt: |
+      You triage incoming issues.
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.3
 
-  system_prompt: |
-    You are a research assistant that helps developers find relevant
-    information about technical issues.
-
-    When asked about an issue:
-    1. Search for relevant documentation
-    2. Look for similar GitHub issues or error messages
-    3. Check related Linear issues in the workspace
-    4. Provide links to all resources
-    5. Summarize findings clearly
-
-    Always cite your sources with links.
-
-  model:
-    anthropic:
-      name: 'claude-3-5-sonnet-20241022'
-      temperature: 0.7
-      max_tokens: 3000
-
-      tools:
-        - type: web_search_20250305
-          name: web_search
-          max_uses: 10
-          allowed_domains:
-            - 'docs.example.com'
-            - 'stackoverflow.com'
-
-      mcp_servers:
-        - type: url
-          url: https://api.sniff.to/mcp/github
-          name: 'GitHub Integration'
-          tool_configuration:
-            allowed_tools: ['search_issues', 'get_issue']
-        - type: url
-          url: https://api.sniff.to/mcp/linear
-          name: 'Linear Integration'
-          tool_configuration:
-            allowed_tools: ['list_issues']
+  - id: 'docs-bot'
+    name: 'Docs Bot'
+    system_prompt: |
+      You answer documentation questions.
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.5
+        tools:
+          - type: web_search_20250305
+            name: web_search
 ```
-
-## Updating Configuration
-
-To update your agent's configuration:
-
-1. Edit your `config.yml` file
-2. Run `sniff deploy` (from the same directory)
-3. Sniff will validate and deploy the updated configuration
-
-```bash
-# Validate without deploying
-sniff deploy --dry-run
-
-# Deploy changes
-sniff deploy
-```
-
-Your agent will immediately use the new configuration for all new interactions.
 
 ## Validation
 
-Sniff validates your configuration when you run `sniff deploy`. Common validation errors:
+Validate your configuration before running:
+
+```bash
+sniff validate
+```
+
+Common errors:
 
 <AccordionGroup>
   <Accordion title="Invalid agent.id format">
-    **Error**: `agent.id must match pattern ^[a-z0-9-]+$`
-
-    **Fix**: Use only lowercase letters, numbers, and hyphens in your agent ID.
-
+    Use only lowercase letters, numbers, and hyphens.
     ```yaml
     # ❌ Invalid
     id: "My_Bot"
@@ -539,30 +317,17 @@ Sniff validates your configuration when you run `sniff deploy`. Common validatio
 
   </Accordion>
 
-  <Accordion title="Missing required field">
-    **Error**: `agent.system_prompt is required`
+<Accordion title="Missing required field">
+  Ensure all required fields are present: `id`, `name`, `system_prompt`, and `model`.
+</Accordion>
 
-    **Fix**: Ensure all required fields are present: `id`, `name`, `system_prompt`, and `model` configuration.
-
-  </Accordion>
-
-  <Accordion title="Invalid model name">
-    **Error**: `Invalid model name: claude-3-invalid`
-
-    **Fix**: Use one of the supported Claude model names listed in the [Available Models](#available-models) section.
-
-  </Accordion>
-
-  <Accordion title="Value out of range">
-    **Error**: `temperature must be between 0.0 and 1.0`
-
-    **Fix**: Check that numeric values like `temperature`, `max_tokens`, and `top_p` are within valid ranges.
-
+  <Accordion title="Temperature out of range">
+    Temperature must be between 0.0 and 1.0.
   </Accordion>
 </AccordionGroup>
 
 ## Next Steps
 
-- Check out [example configurations](https://github.com/sniff-dev/sniff/tree/main/examples) for inspiration
-- Learn about [how agents work in Linear](/how-it-works)
-- View the complete [Schema Reference](/schema-reference) for technical specifications
+<Card title="Schema Reference" icon="book" href="/schema-reference">
+  Complete schema specification with all options
+</Card>

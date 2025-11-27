@@ -1,129 +1,189 @@
-# Sniff - Deploy AI Agents to Linear in Seconds
+# Sniff - Self-Hosted AI Agent Framework
 
-> CLI-first, configuration as code, developer-friendly
+> Declarative AI agents for Linear. Like Docker Compose for AI agents.
 
-Deploy production-ready AI agents to Linear with a simple CLI and YAML config. No infrastructure, no complexity.
+Deploy AI agents with a simple YAML config. Fully self-hosted, no vendor lock-in.
 
 ## Quick Start
 
+### With Docker (Recommended)
+
 ```bash
-# Install CLI
+# 1. Create config file
+npx @sniff-dev/cli init
+
+# 2. Set environment variables
+export LINEAR_ACCESS_TOKEN=lin_api_xxx
+export ANTHROPIC_API_KEY=sk-ant-xxx
+
+# 3. Start with Docker
+docker compose up
+```
+
+### Without Docker
+
+```bash
+# 1. Install CLI
 npm install -g @sniff-dev/cli
 
-# Log in and connect integrations
-sniff login
-
-# Create agent config
+# 2. Create config
 sniff init
 
-# Deploy
-sniff deploy
+# 3. Validate config
+sniff validate
+
+# 4. Start server
+LINEAR_ACCESS_TOKEN=xxx ANTHROPIC_API_KEY=xxx npx @sniff-dev/core
 ```
 
-Done. Your agent is now responding to Linear issues.
-
-## What It Does
-
-When a Linear issue is created or updated:
-
-1. **Agent receives webhook** → Sniff runtime processes it
-2. **Fetches issue details** → Via OAuth proxy
-3. **Analyzes with Claude** → Sends issue data to Anthropic
-4. **Responds in Linear** → Posts agent response as comment
-
-## Project Structure
-
-This is a monorepo containing the open-source CLI tools and shared packages:
-
-```
-sniff/
-├── packages/
-│   ├── cli/                # @sniff-dev/cli - Command-line interface
-│   ├── shared/             # @sniff-dev/shared - Shared TypeScript types
-│   └── config/             # @sniff-dev/config - Config validation
-├── docs/                   # Documentation (Mintlify)
-└── examples/               # Example agent configurations
-```
-
-The backend API and web dashboard are hosted at [sniff.to](https://sniff.to).
+Your agent is now listening at `http://localhost:3000/webhook/linear`.
 
 ## Configuration
 
-Define your agent in `config.yml`:
+Define your agents in `sniff.yml`:
 
 ```yaml
 version: '1.0'
 
-agent:
-  id: 'triage-bot'
-  name: 'Triage Assistant'
+agents:
+  - id: 'triage-bot'
+    name: 'Triage Assistant'
+    description: 'Analyzes and classifies engineering issues'
 
-  system_prompt: |
-    You are a triage specialist for an engineering team.
+    system_prompt: |
+      You are a triage specialist for an engineering team.
 
-    When a new issue is created:
-    1. Classify as: bug, feature, question, or task
-    2. Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
-    3. Provide clear reasoning
+      When a new issue is created:
+      1. Classify as: bug, feature, question, or task
+      2. Set priority: P0 (critical), P1 (high), P2 (medium), P3 (low)
+      3. Provide a brief analysis
 
-    Be concise but thorough.
+      Be concise but thorough.
 
-  model:
-    anthropic:
-      name: 'claude-3-5-sonnet-20241022'
-      temperature: 0.7
-      max_tokens: 2000
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.7
+        max_tokens: 4096
 ```
 
-**To update:** Edit config, run `sniff deploy`. That's it.
+### With Web Search
+
+```yaml
+version: '1.0'
+
+agents:
+  - id: 'research-bot'
+    name: 'Research Assistant'
+    system_prompt: |
+      You are a research assistant.
+      Use web search to find relevant information.
+      Always cite your sources.
+
+    model:
+      anthropic:
+        name: 'claude-sonnet-4-20250514'
+        temperature: 0.7
+        max_tokens: 4096
+        tool_choice:
+          type: 'auto'
+        tools:
+          - type: web_search_20250305
+            name: web_search
+            max_uses: 5
+          - type: web_fetch_20250910
+            name: web_fetch
+            max_uses: 10
+            citations:
+              enabled: true
+```
+
+See [CONFIG.md](CONFIG.md) for full configuration reference.
+
+## Environment Variables
+
+| Variable                | Required | Description                                                        |
+| ----------------------- | -------- | ------------------------------------------------------------------ |
+| `LINEAR_ACCESS_TOKEN`   | Yes      | Linear API token ([get one here](https://linear.app/settings/api)) |
+| `ANTHROPIC_API_KEY`     | Yes      | Anthropic API key ([get one here](https://console.anthropic.com))  |
+| `LINEAR_WEBHOOK_SECRET` | No       | Webhook signing secret (recommended for production)                |
+| `PORT`                  | No       | Server port (default: 3000)                                        |
 
 ## CLI Commands
 
 ```bash
-# Authentication
-sniff login             # Log in to Sniff
-sniff logout            # Log out
-
-# Connections
-sniff connect linear    # Connect Linear workspace via OAuth
-sniff connect anthropic  # Connect Anthropic API key
-sniff connect github    # Connect GitHub
-
-# Agent Management
-sniff init [name]       # Create config.yml template
-sniff deploy            # Deploy/update agent
-sniff deploy --dry-run  # Validate config without deploying
-sniff list              # List all deployed agents
-sniff remove [agent]    # Remove deployed agent
+sniff init [name]        # Create sniff.yml template
+sniff validate           # Validate configuration
+sniff validate -c path   # Validate specific config file
 ```
 
-## Examples
+## Architecture
 
-See [examples/](examples/) directory for real-world agent configurations:
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│     Linear      │────▶│   Sniff Server  │────▶│   Anthropic     │
+│   (Webhook)     │     │   (Your Host)   │     │   (Claude API)  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                               │
+                               ▼
+                        ┌─────────────────┐
+                        │   MCP Servers   │
+                        │   (Optional)    │
+                        └─────────────────┘
+```
 
-- **Triage Agent** - Auto-classify and prioritize issues
-- **Docs Search** - Answer questions by searching documentation
-- **Release Notes** - Generate user-friendly release notes
-- **Similar Issue Finder** - Find duplicates and related issues
-- **Sprint Planning** - Estimate effort and detect dependencies
-- **Technical Support** - Answer questions using docs and past tickets
+1. **Linear sends webhook** → When issues are created/updated
+2. **Sniff processes event** → Validates and normalizes the event
+3. **Agent runs** → Sends context to Claude with your system prompt
+4. **Tools execute** → Web search, MCP servers, etc.
+5. **Response posted** → Agent response appears as Linear comment
 
-## Contributing
+## Features
 
-Contributions are welcome! This repo contains the CLI and shared packages.
+- **Declarative Config** - Define agents in YAML, version control your config
+- **Self-Hosted** - Run anywhere: Docker, cloud, or local machine
+- **No Database** - Stateless design, config from YAML file
+- **MCP Support** - Connect any MCP-compatible tool server
+- **Web Search** - Built-in web search and fetch capabilities
+- **Extended Thinking** - Enable Claude's extended thinking for complex analysis
 
-### Development Setup
+## Project Structure
+
+```
+sniff/
+├── packages/
+│   ├── cli/          # @sniff-dev/cli - Command-line tools
+│   ├── core/         # @sniff-dev/core - Agent runtime and server
+│   └── config/       # @sniff-dev/config - Config validation
+├── docker-compose.yml
+├── Dockerfile
+├── sniff.yml         # Your agent configuration
+└── CONFIG.md         # Configuration specification
+```
+
+## Webhook Setup
+
+After starting the server, configure Linear to send webhooks:
+
+1. Go to **Linear Settings** → **API** → **Webhooks**
+2. Create webhook pointing to `http://your-server:3000/webhook/linear`
+3. Select events: `Issue` (create, update)
+4. (Optional) Copy the signing secret to `LINEAR_WEBHOOK_SECRET`
+
+## Development
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Build packages
+# Build all packages
 pnpm build
 
-# Test CLI locally
-cd packages/cli
-pnpm dev --help
+# Run server locally
+LINEAR_ACCESS_TOKEN=xxx ANTHROPIC_API_KEY=xxx node packages/core/dist/bin.js
+
+# Or with Docker
+docker compose up --build
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
@@ -134,6 +194,5 @@ MIT
 
 ## Support
 
-- **Documentation**: [docs.sniff.to](https://docs.sniff.to)
-- **Discord**: [discord.gg/huk9sSQCJA](https://discord.gg/huk9sSQCJA)
 - **Issues**: [github.com/sniff-dev/sniff/issues](https://github.com/sniff-dev/sniff/issues)
+- **Discord**: [discord.gg/huk9sSQCJA](https://discord.gg/huk9sSQCJA)

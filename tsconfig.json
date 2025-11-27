@@ -8,7 +8,7 @@
       "path": "./packages/config"
     },
     {
-      "path": "./packages/shared"
+      "path": "./packages/core"
     }
   ]
 }

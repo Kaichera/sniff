@@ -1,149 +1,157 @@
 ---
 title: How It Works
-description: Learn how to use Sniff agents in your Linear workspace
+description: Understanding the Sniff agent lifecycle
 ---
 
-# Using Sniff in Linear
+# How It Works
 
-Sniff is an AI agent that works like a team member in your Linear workspace. You can @mention it, assign issues to it, and collaborate with it in real-time.
+Sniff connects Linear to Claude through webhooks. When something happens in Linear, your agent analyzes it and responds.
 
-![Sniff in Linear](/images/linear1.png)
-
-## One Agent, Multiple Personas
-
-In Linear, you'll only see **one agent called "Sniff"**, but it can run different specialized agents depending on what's deployed to your workspace.
-
-For example, your team might deploy multiple agent configurations:
-
-- **Triage Agent** - Classifies and prioritizes issues
-- **Docs Search Agent** - Finds answers in documentation
-- **Release Notes Agent** - Generates release summaries
-- **Sprint Planning Agent** - Helps organize sprints
-
-**They all appear as the same "Sniff" agent in Linear.** When you @mention or assign Sniff:
-
-- **If only one agent is deployed** → Sniff runs that agent automatically
-- **If multiple agents are deployed** → Sniff asks you which agent to use for this task
-
-## How to Use Sniff
-
-There are two simple ways to interact with Sniff:
-
-### 1. @Mention Sniff
-
-![@Mention Sniff](/images/linear2.png)
-
-The quickest way is to @mention Sniff in any issue:
+## Architecture
 
 ```
-@Sniff
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│     Linear      │────▶│   Sniff Server  │────▶│   Anthropic     │
+│   (Webhook)     │     │   (Your Host)   │     │   (Claude API)  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                               │
+                               ▼
+                        ┌─────────────────┐
+                        │   MCP Servers   │
+                        │   (Optional)    │
+                        └─────────────────┘
 ```
 
-That's it! Sniff will:
+## The Agent Lifecycle
 
-- Read the issue details
-- Ask which agent to use (if multiple are deployed)
-- Run the selected agent and respond
+### 1. Event Received
 
-### 2. Assign the Issue to Sniff
+When an issue is created or updated in Linear, a webhook is sent to your Sniff server:
 
-![Assign Issue to Sniff](/images/linear3.png)
-
-For ongoing work, assign the issue directly to Sniff:
-
-1. Open any Linear issue
-2. Click the assignee field
-3. Select Sniff from the dropdown
-
-When you assign an issue:
-
-- **You remain the assignee** (you're responsible)
-- **Sniff becomes the delegate** (it does the work)
-- Sniff asks which agent to use (if multiple are deployed)
-
-## What You'll See
-
-After you @mention or assign Sniff:
-
-### 1. Agent Selection (If Multiple Agents)
-
-![Agent Selection](/images/linear4.png)
-
-If your team has deployed multiple agents, Sniff will first ask you to choose which one to use:
-
-```
-Sniff: "Multiple agents are available. Which one should handle this issue?"
+```json
+{
+  "action": "create",
+  "type": "Issue",
+  "data": {
+    "id": "abc-123",
+    "title": "Login button not working",
+    "description": "Users report the login button is unresponsive..."
+  }
+}
 ```
 
-Linear will display buttons or a dropdown with the available agents:
+### 2. Agent Selected
 
-- Triage Agent
-- Docs Search Agent
-- Release Notes Agent
+Sniff matches the event to your configured agent(s). The agent's system prompt defines how it should respond.
 
-Click the agent you want to use, and Sniff will run it. Each agent knows exactly what to do based on how it's configured.
+### 3. Claude Processes
 
-### 2. Instant Response
-
-![Instant Response](/images/linear5.png)
-
-Sniff responds within seconds, showing which agent is running:
+The issue context is sent to Claude along with your system prompt:
 
 ```
-Sniff: "[Triage Agent] Reading the issue and analyzing the problem..."
+System: You are a triage specialist...
+
+User: New issue created:
+Title: Login button not working
+Description: Users report the login button is unresponsive...
 ```
 
-The agent name in brackets tells you which persona is handling the issue.
+### 4. Tools Execute (Optional)
 
-### 3. Real-Time Updates
+If your agent has tools configured, Claude can:
 
-![Thinking Process](/images/linear6.png)
+- **Search the web** for documentation or error codes
+- **Fetch web pages** for detailed content
+- **Call MCP servers** for external integrations
 
-As Sniff works, you'll see its thinking process:
+### 5. Response Posted
 
-- "Looking for similar issues in the workspace"
-- "Searching documentation for error code XYZ"
-- "Found 3 similar issues from the past month"
+Claude's response is posted as a comment on the Linear issue:
 
-### 4. Final Answer
+![Agent Response](/images/linear5.png)
 
-![Final Answer](/images/linear7.png)
+```markdown
+### Triage Analysis
 
-When done, Sniff provides a clear response:
+**Type:** Bug
+**Priority:** P1 (High)
 
+**Reasoning:**
+This affects core authentication functionality. Users cannot
+access the application, making this a high-priority issue.
+
+**Suggested Labels:**
+
+- `bug`
+- `auth`
+- `frontend`
+
+**Next Steps:**
+
+1. Assign to frontend team
+2. Check recent auth-related changes
 ```
-Sniff: "[Triage Agent] This appears to be a P1 bug affecting authentication.
 
-Based on my analysis:
-- Affects all mobile users (50% of your user base)
-- Similar to issues #123 and #456 from last month
-- Workaround: users can log in via desktop
+## Interacting with Agents
 
-Recommended actions:
-1. Move to "In Progress" status
-2. Assign to mobile team
-3. Target for this week's sprint"
+### @Mention
+
+Users can @mention Sniff in any issue to trigger analysis:
+
+![Mention Sniff](/images/linear2.png)
+
+### Assign to Sniff
+
+Assign an issue directly to Sniff for automatic handling:
+
+![Assign to Sniff](/images/linear3.png)
+
+## What Sniff Can Access
+
+When processing an issue, your agent receives:
+
+- **Issue title and description**
+- **Labels and priority**
+- **Assignee and creator info**
+- **Team and project context**
+- **Recent comments**
+
+## Stateless Design
+
+Sniff is stateless by design:
+
+- **No database** - Configuration comes from `sniff.yml`
+- **No session storage** - Each webhook is processed independently
+- **Credentials from env vars** - `LINEAR_ACCESS_TOKEN`, `ANTHROPIC_API_KEY`
+
+This makes deployment simple and scaling straightforward.
+
+## Multiple Agents
+
+You can define multiple agents in your configuration:
+
+```yaml
+version: '1.0'
+
+agents:
+  - id: 'triage-bot'
+    name: 'Triage Assistant'
+    # ...
+
+  - id: 'docs-bot'
+    name: 'Documentation Helper'
+    # ...
 ```
 
-## What Sniff Can Do
-
-Depending on how your team configured it, Sniff can:
-
-- **Search the web** - Find documentation, error codes, solutions
-- **Read web pages** - Pull content from specific URLs
-- **Search Linear** - Find similar issues, check status, read comments
-- **Deep reasoning** - Use extended thinking for complex problems
-
-<Tip>Ask your team admin what capabilities your Sniff agents have!</Tip>
+Each agent has its own system prompt and model configuration.
 
 ## Next Steps
 
-- **New to agents?** Ask your team admin which agent personas are deployed
-- **Want to create agents?** See the [Quickstart](/quickstart) guide
-- **Customize behavior?** Check the [Configuration](/configuration) reference
-
-## Learn More
-
-- [Linear's Agent Docs](https://linear.app/agents) - Official guide to agents
-- [Quickstart Guide](/quickstart) - Deploy your first agent in 2 minutes
-- [Configuration](/configuration) - Customize agent behavior
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="code" href="/configuration">
+    Customize your agent's behavior
+  </Card>
+  <Card title="Schema Reference" icon="book" href="/schema-reference">
+    Full configuration options
+  </Card>
+</CardGroup>

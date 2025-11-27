@@ -14,7 +14,7 @@ const config = {
       channel: 'next',
     },
   ],
-  tagFormat: 'shared-v${version}',
+  tagFormat: 'core-v${version}',
   plugins: [
     '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',
@@ -41,7 +41,7 @@ if (!isPrerelease) {
     {
       assets: ['package.json'],
       message:
-        'chore(release): @sniff-dev/shared ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
+        'chore(release): @sniff-dev/core ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
     },
   ]);
 }

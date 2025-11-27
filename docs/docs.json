@@ -2,11 +2,11 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Sniff",
-  "description": "Deploy production-ready AI agents to Linear in under 2 minutes",
+  "description": "Self-hosted AI agent framework for Linear",
   "logo": {
     "light": "/logo/light.png",
     "dark": "/logo/dark.png",
-    "href": "https://sniff.to"
+    "href": "https://github.com/sniff-dev/sniff"
   },
   "favicon": "/favicon.png",
   "colors": {
@@ -28,27 +28,23 @@
         "label": "",
         "href": "https://github.com/sniff-dev/sniff",
         "icon": "github"
-      },
-      {
-        "label": "Sign In",
-        "href": "https://sniff.to/sign-in"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Get Started",
-      "href": "https://sniff.to/sign-up"
+      "label": "GitHub",
+      "href": "https://github.com/sniff-dev/sniff"
     }
   },
   "navigation": {
     "groups": [
       {
         "group": "Getting Started",
-        "pages": ["introduction", "quickstart", "how-it-works", "configuration"]
+        "pages": ["introduction", "quickstart", "how-it-works"]
       },
       {
         "group": "Reference",
-        "pages": ["schema-reference"]
+        "pages": ["configuration", "schema-reference"]
       }
     ]
   }
