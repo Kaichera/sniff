@@ -5,15 +5,14 @@
  * Loads config, initializes Linear and LLM, and starts the server.
  */
 
-import { loadConfig } from '@sniff-dev/config';
+import { parseAndValidateConfig } from '@sniff-dev/config';
 import { createSniffServer, type SniffServerConfig } from './index.js';
 import { LinearPlatform } from '../platforms/index.js';
 import { createAnthropicClient } from '../llm/anthropic.js';
-import { createTokenStorage } from '../storage/index.js';
+import { createTokenStorage, createConfigStorage } from '../storage/index.js';
 import type { AgentConfig } from '../agent/runner.js';
 
 export interface StartServerOptions {
-  configPath?: string;
   port?: number;
 }
 
@@ -47,12 +46,22 @@ async function getLinearToken(): Promise<string> {
  * Start the Sniff server
  */
 export async function startServer(options: StartServerOptions = {}): Promise<void> {
-  const configPath = options.configPath ?? 'sniff.yml';
+  // Load configuration from DB (if exists)
+  console.log('Loading configuration from database...');
+  const configStorage = createConfigStorage();
+  let yamlContent: string | null;
+  try {
+    yamlContent = await configStorage.get();
+  } finally {
+    configStorage.close();
+  }
 
-  // Load configuration
-  console.log('Loading configuration...');
-  const config = loadConfig(configPath);
-  console.log('Configuration loaded');
+  const config = yamlContent ? parseAndValidateConfig(yamlContent) : null;
+  if (config) {
+    console.log('Configuration loaded');
+  } else {
+    console.log('No config found. Deploy agents with: sniff deploy --server <url>');
+  }
 
   // Read credentials
   const linearToken = await getLinearToken();
@@ -79,23 +88,28 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
   });
   console.log('LLM client initialized');
 
-  // Convert config agents to AgentConfig format
-  const agents: AgentConfig[] = config.agents.map((agent) => ({
-    id: agent.id,
-    name: agent.name,
-    systemPrompt: agent.system_prompt,
-    model: {
-      name: agent.model.anthropic.name,
-      temperature: agent.model.anthropic.temperature,
-      maxTokens: agent.model.anthropic.max_tokens,
-      thinking: agent.model.anthropic.thinking,
-      tools: agent.model.anthropic.tools,
-      mcpServers: agent.model.anthropic.mcp_servers,
-    },
-  }));
+  // Convert config agents to AgentConfig format (empty if no config yet)
+  const agents: AgentConfig[] = config
+    ? config.agents.map((agent) => ({
+        id: agent.id,
+        name: agent.name,
+        systemPrompt: agent.system_prompt,
+        model: {
+          name: agent.model.anthropic.name,
+          temperature: agent.model.anthropic.temperature,
+          maxTokens: agent.model.anthropic.max_tokens,
+          thinking: agent.model.anthropic.thinking,
+          tools: agent.model.anthropic.tools,
+          mcpServers: agent.model.anthropic.mcp_servers,
+        },
+      }))
+    : [];
 
   // Determine port
   const port = options.port ?? (process.env.PORT ? parseInt(process.env.PORT, 10) : 3000);
+
+  // Get API key for remote deploy (optional)
+  const apiKey = process.env.SNIFF_API_KEY;
 
   // Create and start server
   const serverConfig: SniffServerConfig = {
@@ -103,6 +117,7 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
     platform,
     agents,
     llmClient,
+    apiKey,
   };
 
   const server = createSniffServer(serverConfig);
@@ -121,9 +136,15 @@ export async function startServer(options: StartServerOptions = {}): Promise<voi
   await server.start();
 
   console.log('\nServer is running!');
-  console.log('\nAgents:');
-  for (const agent of agents) {
-    console.log(`  - ${agent.name} (${agent.id})`);
+  if (agents.length > 0) {
+    console.log('\nAgents:');
+    for (const agent of agents) {
+      console.log(`  - ${agent.name} (${agent.id})`);
+    }
+  } else {
+    console.log(
+      '\nNo agents configured. Deploy with: sniff deploy --server http://localhost:' + port,
+    );
   }
   console.log(`\nWebhook: POST http://localhost:${port}/webhook/linear`);
   console.log('\nPress Ctrl+C to stop');

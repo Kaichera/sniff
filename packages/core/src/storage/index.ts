@@ -104,3 +104,6 @@ export class SQLiteTokenStorage implements TokenStorage {
 export function createTokenStorage(dbPath?: string, key?: string): SQLiteTokenStorage {
   return new SQLiteTokenStorage(dbPath, key);
 }
+
+// Re-export config storage
+export { createConfigStorage, type ConfigStorage } from './config.js';
