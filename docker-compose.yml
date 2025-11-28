@@ -2,8 +2,8 @@
 #
 # Quick start:
 #   1. Copy .env.example to .env and fill in your credentials
-#   2. Create/edit sniff.yml with your agent configuration
-#   3. Run: docker compose up
+#   2. Run: docker compose up
+#   3. Deploy agents: sniff deploy --server http://localhost:3000
 #
 # Your agent will be available at http://localhost:3000
 # Configure your Linear webhook to point to: http://your-server:3000/webhook/linear
@@ -16,10 +16,11 @@ services:
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
     volumes:
-      - ./sniff.yml:/app/sniff.yml:ro
+      - sniff-data:/home/sniff/.sniff
     environment:
       - LINEAR_ACCESS_TOKEN=${LINEAR_ACCESS_TOKEN}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SNIFF_API_KEY=${SNIFF_API_KEY:-}
       - PORT=${PORT:-3000}
     restart: unless-stopped
     healthcheck:
@@ -36,3 +37,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 10s
+
+volumes:
+  sniff-data:
