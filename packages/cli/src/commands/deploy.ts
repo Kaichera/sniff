@@ -72,6 +72,7 @@ export const deploy = new Command('deploy')
       for (const agent of result.agents) {
         console.log(chalk.gray(`  - ${agent.name} (${agent.id})`));
       }
+      process.exit(0);
     } catch (error) {
       if ((error as Error).cause && String((error as Error).cause).includes('ECONNREFUSED')) {
         console.error(chalk.red(`Cannot connect to server: ${serverUrl}`));
