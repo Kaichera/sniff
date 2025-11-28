@@ -77,7 +77,7 @@ export const auth = new Command('auth').description('Authenticate with Linear').
             const data = (await res.json()) as { authenticated: boolean };
             if (data.authenticated) {
               spinner.succeed('Authenticated with Linear');
-              return;
+              process.exit(0);
             }
           }
         } catch {
